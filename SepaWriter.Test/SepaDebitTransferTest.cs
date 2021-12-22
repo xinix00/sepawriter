@@ -173,7 +173,70 @@ namespace SepaWriter.Test
             Assert.AreEqual(total, transfert.PaymentControlSumInCents);
 
             Assert.AreEqual(MULTIPLE_ROW_RESULT, transfert.AsXmlString());
-            
+        }
+
+        [Test]
+        public void ShouldManageMultipleDateTransactionsTransfer()
+        {
+            var transfert = new SepaDebitTransfer
+                {
+                    CreationDate = new DateTime(2013, 02, 17, 22, 38, 12),
+                    RequestedExecutionDate = new DateTime(2013, 02, 18),
+                    MessageIdentification = "transferID",
+                    PaymentInfoId = "paymentInfo",
+                    InitiatingPartyName = "Me",
+                    Creditor = Creditor
+                };
+
+            const decimal amount = 23.45m;
+            transfert.AddDebitTransfer(new SepaDebitTransferTransaction
+                {
+                    Id = "Transaction Id 1",
+                    Debtor = new SepaIbanData
+                        {
+                            Bic = "BANK_BIC",
+                            Iban = "ACCOUNT_IBAN_SAMPLE",
+                            Name = "NAME"
+                        },
+                    Amount = amount,
+                    RemittanceInformation = "Transaction description 1"
+                });
+
+            const decimal amount2 = 12.56m;
+            transfert.AddDebitTransfer(new SepaDebitTransferTransaction
+                {
+                    Id = "Transaction Id 2",
+                    Debtor = new SepaIbanData
+                        {
+                            Bic = "BANK_BIC",
+                            Iban = "ACCOUNT_IBAN_SAMPLE",
+                            Name = "NAME"
+                        },
+                    Amount = amount2,
+                    RequestedExecutionDate = new DateTime(2013, 02, 19),
+                    RemittanceInformation = "Transaction description 2"
+                });
+
+
+            const decimal amount3 = 27.35m;
+            transfert.AddDebitTransfer(new SepaDebitTransferTransaction
+                {
+                    Id = "Transaction Id 3",
+                    Debtor = new SepaIbanData
+                        {
+                            Bic = "BANK_BIC",
+                            Iban = "ACCOUNT_IBAN_SAMPLE",
+                            Name = "NAME"
+                        },
+                    Amount = amount3,
+                    RequestedExecutionDate = new DateTime(2013, 02, 20),
+                    RemittanceInformation = "Transaction description 3"
+                });
+
+            const decimal total = (amount + amount2 + amount3)*100;
+
+            Assert.AreEqual(total, transfert.HeaderControlSumInCents);
+            Assert.AreEqual(total, transfert.PaymentControlSumInCents);
         }
 
         [Test]

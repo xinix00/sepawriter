@@ -23,6 +23,11 @@ namespace SepaWriter
         public SepaSequenceType SequenceType { get; set; }
 
         /// <summary>
+        ///     Requested Execution Date (default is object creation date)
+        /// </summary>
+        public DateTime? RequestedExecutionDate { get; set; }
+
+        /// <summary>
         ///     Debtor IBAN data
         /// </summary>
         /// <exception cref="SepaRuleException">If debtor to set is not valid.</exception>

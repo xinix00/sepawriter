@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
+using System.Linq;
 using SepaWriter.Utils;
 
 namespace SepaWriter
@@ -99,16 +100,28 @@ namespace SepaWriter
 					NewElement("Othr").NewElement("Id", InitiatingPartyId);
 			}
 
-            // Part 2: Payment Information for each Sequence Type.
-            foreach (SepaSequenceType seqTp in Enum.GetValues(typeof(SepaSequenceType)))
+            // Part 2: Payment Information for each Sequence Type and RequestedExecutionDate
+            var seqTransactions = 
+                from transaction in transactions
+                group transaction by new {
+                    SequenceType = transaction.SequenceType,
+                    RequestedExecutionDate = transaction.RequestedExecutionDate 
+                        ?? RequestedExecutionDate
+                } into g
+                select new {
+                    SequenceType = g.Key.SequenceType,
+                    RequestedExecutionDate = g.Key.RequestedExecutionDate,
+                    Transfers = g
+                };
+            
+            foreach (var seqTransaction in seqTransactions)
             {
-                var seqTransactions = transactions.FindAll(d => d.SequenceType == seqTp);
-                var pmtInf = GeneratePaymentInformation(xml, seqTp, seqTransactions);
+                var pmtInf = GeneratePaymentInformation(xml, seqTransaction.SequenceType, seqTransaction.Transfers);
                 // If a payment information has been created
                 if (pmtInf != null)
                 {
                     // Part 3: Debit Transfer Transaction Information
-                    foreach (var transfer in seqTransactions)
+                    foreach (var transfer in seqTransaction.Transfers)
                     {
                         GenerateTransaction(pmtInf, transfer);
                     }
