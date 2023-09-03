@@ -116,7 +116,7 @@ namespace SepaWriter
             
             foreach (var seqTransaction in seqTransactions)
             {
-                var pmtInf = GeneratePaymentInformation(xml, seqTransaction.SequenceType, seqTransaction.Transfers);
+                var pmtInf = GeneratePaymentInformation(xml, seqTransaction.SequenceType, seqTransaction.RequestedExecutionDate, seqTransaction.Transfers);
                 // If a payment information has been created
                 if (pmtInf != null)
                 {
@@ -137,7 +137,7 @@ namespace SepaWriter
         /// <param name="xml">The XML object to write</param>
         /// <param name="sqType">The Sequence Type</param>
         /// <param name="seqTransactions">The transactions of the specified type</param>
-        private XmlElement GeneratePaymentInformation(XmlDocument xml, SepaSequenceType sqType, IEnumerable<SepaDebitTransferTransaction> seqTransactions)
+        private XmlElement GeneratePaymentInformation(XmlDocument xml, SepaSequenceType sqType, DateTime requestedExecutionDate, IEnumerable<SepaDebitTransferTransaction> seqTransactions)
         {
             int controlNumber = 0;
             decimal controlSum = 0;
@@ -167,7 +167,7 @@ namespace SepaWriter
             pmtTpInf.NewElement("LclInstrm").NewElement("Cd", LocalInstrumentCode);
             pmtTpInf.NewElement("SeqTp", SepaSequenceTypeUtils.SepaSequenceTypeToString(sqType));
 
-            pmtInf.NewElement("ReqdColltnDt", StringUtils.FormatDate(RequestedExecutionDate));
+            pmtInf.NewElement("ReqdColltnDt", StringUtils.FormatDate(requestedExecutionDate));
             pmtInf.NewElement("Cdtr").NewElement("Nm", Creditor.Name);
 
             var dbtrAcct = pmtInf.NewElement("CdtrAcct");
